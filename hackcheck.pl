@@ -1,62 +1,51 @@
 #!/usr/bin/perl -w
 
-#Dominic White
-#http://singe.rucus.net/
-#Aug 7th 2005
-#GPL'ed
+# Dominic White
+# http://singe.za.net/
+# Aug 7th 2005
+# Updated Nov 15th 2011
+# GPL'ed
 
-#Checks DSheilds 'Are you cracked?' site to see if an IP address is listed
-#in the DShield database as an attacker
-#http://www.dshield.org/warning_explanation.php
+# Checks if the specified machine shows up as a reported source in DShield
 
 use strict;
 use LWP::Simple qw($ua get);
 use HTML::TokeParser;
 
-#Proxy init
-#my proxy="http://username:password@proxy.org:3128";
+# Proxy init
+# my proxy="http://username:password@proxy.org:3128";
 my $proxy="";
 $ua->proxy('http',$proxy);
 
-#Var init
+# Var init
 my $ip="";
 my $content="";
 my $stream="";
 my $output="";
 
-#Get cmd line IP
+# Get cmd line IP
 $ip = (($#ARGV == 0) ? $ARGV[0] : "");
 
-#If no cmd line then use default
+# If no cmd line then use default
 if ($ip eq "") {
-	$content = get("http://www.dshield.org/warning_explanation.php");
-} else {
-	$content = get("http://www.dshield.org/warning_explanation.php?fip=$ip");
+	$ip = get("http://www.whatismyip.org/");
+	die "Couldn't get external IP address. Are you online, check my proxy settings?.\n" unless defined $ip;
+	print "No IP provided, detected your external IP as $ip\n";
 }
-die "Couldn't fetch the page, something is wrong. Check that your proxy and the
-URL work.\n" unless defined $content;
+$content = get("http://www.dshield.org/ipinfo.html?ip=$ip");
+die "Couldn't fetch the page, something is wrong. Check that your proxy and the URL work.\n" unless defined $content;
 
-#Init tokenizer
+# Init tokenizer
 $stream = HTML::TokeParser->new(\$content) ||
 	die "There was an error reading the page.\n";
 
-#We want the 3rd <img> tag
-$stream->get_tag("img");
-$stream->get_tag("img");
-$stream->get_tag("img");
+# We want the 14th <td> tag
+$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");$stream->get_tag("td");
+$output = $stream->get_trimmed_text("/td");
 
-#The good stuff is in the <b> tag
-$stream->get_tag("b");
-
-#Output data
-$output = $stream->get_trimmed_text("/b");
-$ip=$output;
-$ip =~ s/^.*IP.\((.*)\).*$/$1/;
-
-if ($output =~ /does not appear/) {
-	print "$ip is Safe\n";
+if ($output =~ /- none -/) {
+	print "There are no reports for $ip\n";
 } else {
-	$output =~ s/^.*attacker.(.*).times.*$/$1/;
-	print "$ip is Hacked : It appears $output times.\n";
+	print "$ip may be Hacked : It was reported $output times.\n";
 	exit 1; #Exit with a return code of 1
 }

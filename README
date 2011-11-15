@@ -1,15 +1,16 @@
 Dominic at SensePost
 GPL v3
-Originally published 2005
+Originally published 2005, updated 2011
 http://singe.za.net/blog/archives/494-Am-I-Hacked.html
 
 The script is simple, no arguments and it checks your machines IP, or pass an
 IP to see if it is in the database. Example output:
 
     $ hackcheck.pl
-    146.231.115.12 is Safe
+	No IP provided, detected your external IP as 0.0.0.0
+	There are no reports for 0.0.0.0
     $ hackcheck.pl 0.0.0.0
-    0.0.0.0 is Hacked : It appears 157,699 times.
+    0.0.0.0 may be Hacked : It was reported 128527 times.
 
 You can run this regularly to be notified if a machine you administer shows up.
 The cron script is very simple. Just drop it into /etc/cron.daily or the like.
@@ -33,3 +34,5 @@ The cron script is very simple. Just drop it into /etc/cron.daily or the like.
 
 DShield relies on the submissions of people from around the world. Find out how
 you can contribute by submitting your logs here.
+
+This is dependant on the HTML structure of the page "http://www.dshield.org/ipinfo.html?ip=" if it changes, the script will break, but is just as easy to fix, so mail me a bug report. Check singe.za.net/dominicwhite for address.
