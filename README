@@ -1,0 +1,35 @@
+Dominic at SensePost
+GPL v3
+Originally published 2005
+http://singe.za.net/blog/archives/494-Am-I-Hacked.html
+
+The script is simple, no arguments and it checks your machines IP, or pass an
+IP to see if it is in the database. Example output:
+
+    $ hackcheck.pl
+    146.231.115.12 is Safe
+    $ hackcheck.pl 0.0.0.0
+    0.0.0.0 is Hacked : It appears 157,699 times.
+
+You can run this regularly to be notified if a machine you administer shows up.
+The cron script is very simple. Just drop it into /etc/cron.daily or the like.
+
+    #!/bin/sh
+    test -f /usr/bin/hackcheck.pl || exit 0
+
+    MAILTO=root
+
+    #Put the IP address of the machine you want checked here
+    IP=0.0.0.0
+
+    [ -z "$MAILTO" ] && exit 1
+
+    hackcheck.pl $IP > /dev/null
+    if [ "$?" -eq "1" ]; then
+            hackcheck.pl $IP| \
+            mail -e -s "DShield Hack Warning \
+            on $(hostname -f) [$(date +%D)]" $MAILTO
+    fi
+
+DShield relies on the submissions of people from around the world. Find out how
+you can contribute by submitting your logs here.
